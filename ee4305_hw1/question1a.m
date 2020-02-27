@@ -33,17 +33,17 @@ while (flag && i <= iters)
     i = i + 1;
 end
 
-% figure;
-% x_values = [-2:0.01:2]; y_values = [-2:0.01:2];
-% f = @(x,y) (1-x).^2 + 100*(y-x.^2).^2;
-% [xx, yy] = meshgrid(x_values, y_values);
-% ff = f(xx,yy);
-% contour(xx, yy, ff, 100);
-% 
-% hold on;
-% scatter(x, y);
-% xlabel('x');
-% ylabel('y');
+figure;
+x_values = [-2:0.01:2]; y_values = [-2:0.01:2];
+f = @(x,y) (1-x).^2 + 100*(y-x.^2).^2;
+[xx, yy] = meshgrid(x_values, y_values);
+ff = f(xx,yy);
+contour(xx, yy, ff, 100);
+
+hold on;
+scatter(x, y);
+xlabel('x');
+ylabel('y');
 
 plot(iterations, x);
 hold on;
