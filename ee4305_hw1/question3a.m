@@ -2,42 +2,61 @@
 n_train = 501;
 n_val = 167;
 eta = 0.01;
-epochs = 1e2;
+epoch_test = [1e2, 2e2, 5e2, 1e3, 1.25e3, 1.5e3, 1.75e3, 2e3];
+epochs = epoch_test(5);
+
+epoch = [1:1:epochs];
+training_sets = [1:1:501];
 
 % Defining training data
 filepath_train = "group_3\\train";
 train_folder = dir(filepath_train);
 training_data = zeros([65536, n_train]);
-training_label = zeros([n_train, 1]);
+training_label = zeros([1, n_train]);
 
 % Extract training data
 for i=3:n_train+2
     [img, label] = extract_img(filepath_train, train_folder, i);
     training_data(:,i-2) = img;
-    training_label(i-2,:) = label;
+    training_label(:,i-2) = label;
 end
 
 % Retrieve validation data
 filepath_val = "group_3\\val";
 val_folder = dir(filepath_val);
 validation_data = zeros([65536, n_val]);
-validation_label = zeros([n_val, 1]);
+validation_label = zeros([1, n_val]);
 
 % Extract validation data
 for i=3:n_val+2
     [img, label] = extract_img(filepath_val, val_folder, i);
     validation_data(:,i-2) = img;
-    validation_label(i-2,:) = label;
+    validation_label(:,i-2) = label;
 end
 
 % define perceptron
 net = perceptron;
 net.trainParam.epochs = epochs;
 
-for i=1:n_train
-   idx = randperm(size(training_data, 2));
-   [net, a, e] = adapt(net, training_data(:,idx), training_label(:,idx));
+accu_train = zeros(1, epochs);
+accu_val = zeros(1, epochs);
+
+% Training loop
+for i=1:epochs
+    idx = randperm(size(training_data, 2));
+    [net,a,e] = adapt(net, training_data(:,idx), training_label(:,idx));
+    
+    pred_train = net(training_data(:,idx));
+    accu_train(i) = 1 - mean(abs(pred_train - training_label(:,idx)));
+    
+    val_train = net(validation_data);
+    accu_val(i) = 1 - mean(abs(val_train - validation_label));
 end
+
+plot(epoch, accu_train, epoch, accu_val);
+xlabel("epoch");
+ylabel("accuracy (%)");
+legend({'training', 'validation'}, 'Location', 'northwest');
 
 function [img, label] = extract_img(filepath, folder, i)
 % Extracts the i-th image and its corresponding label as denoted in the given filepath. Only one
