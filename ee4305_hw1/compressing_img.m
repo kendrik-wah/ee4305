@@ -14,13 +14,15 @@ for i=3:n_train+2
     training_label(:,i-2) = label;
 end
 
-[dimensions, img, values] = resize_img_pca(filepath_train, train_folder, 3);
-reduced_data = img * values;
 
-figure;
-imshow(img, []);
-figure;
-imshow(reduced_data, []);
+
+
+
+[old_dim, old_img, new_dim, new_img] = resize_img(filepath_train, train_folder, 3, 0.5);
+
+
+
+
 
 function [img, label] = extract_img(filepath, folder, i)
 % Extracts the i-th image and its corresponding label as denoted in the given filepath. Only one
@@ -39,7 +41,7 @@ function img = show_img(filepath, folder, i)
     imshow(img, []);
 end
 
-function [old_dim, old_img, new_dim, new_img] = resize_img_imresize(filepath, folder, i, scale)
+function [old_dim, old_img, new_dim, new_img] = resize_img(filepath, folder, i, scale)
     filename = filepath + '\\' + folder(i).name;
     old_img = imread(filename);
     old_dim = size(old_img);
@@ -47,12 +49,17 @@ function [old_dim, old_img, new_dim, new_img] = resize_img_imresize(filepath, fo
     new_dim = size(new_img);
 end
 
-function [old_dim, old_img, values] = resize_img_pca(filepath, folder, i)
+function [old_dim, old_img, coeff, img, x_form] = pca_img(filepath, folder, i, nComp)
     filename = filepath + '\\' + folder(i).name;
     old_img = imread(filename);
-    imshow(old_img, []);
     old_dim = size(old_img);
-    old_img = double(old_img);
-    values = pca(old_img);
-end
+    dbl_img = double(old_img);
+    dbl_img_mean = mean(dbl_img);
+    dbl_img_adjusted = dbl_img-dbl_img_mean;
     
+    [coeff, score] = pca(dbl_img_adjusted);
+    x_form = score(:,1:nComp)*coeff(:,1:nComp)';
+    x_form = x_form + dbl_img_mean;
+    x_form = uint8(x_form);
+    img = dbl_img;
+end
