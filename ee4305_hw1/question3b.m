@@ -44,7 +44,7 @@ for i=1:length(epoch_test)
    epoch = [1:1:epochs]; 
    [net, accu_train, accu_val] = train_seq(training_data, training_label, validation_data, validation_labe, epochs);
    
-    filename = sprintf("q3a_sequential\\sequential_epoch_%d", epochs);
+    filename = sprintf("q3b_sequential\\sequential_epoch_%d", epochs);
     plot(epoch, accu_train, epoch, accu_val);
     xlabel("epoch");
     ylabel("accuracy (%)");
@@ -87,4 +87,27 @@ function [img, label] = extract_img(filepath, folder, i)
     tmp = strsplit(filename, {'_', '.'});
     label = str2num(tmp{3});
    
+end
+
+function [old_dim, old_img, new_dim, new_img] = resize_img(filepath, folder, i, scale)
+    filename = filepath + '\\' + folder(i).name;
+    old_img = imread(filename);
+    old_dim = size(old_img);
+    new_img = imresize(old_img, scale);
+    new_dim = size(new_img);
+end
+
+function [old_dim, old_img, coeff, img, x_form] = pca_img(filepath, folder, i, nComp)
+    filename = filepath + '\\' + folder(i).name;
+    old_img = imread(filename);
+    old_dim = size(old_img);
+    dbl_img = double(old_img);
+    dbl_img_mean = mean(dbl_img);
+    dbl_img_adjusted = dbl_img-dbl_img_mean;
+    
+    [coeff, score] = pca(dbl_img_adjusted);
+    x_form = score(:,1:nComp)*coeff(:,1:nComp)';
+    x_form = x_form + dbl_img_mean;
+    x_form = uint8(x_form);
+    img = dbl_img;
 end

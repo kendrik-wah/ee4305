@@ -60,21 +60,13 @@ for i=1:length(epoch_test)
     val_acc(i) = accuracy;
 end
 
-filename = sprintf("q3a_batch\\batch_accuracy");
+filename = sprintf("q3b_batch\\batch_accuracy");
 plot(epoch_test, val_acc);
 xlabel("epochs");
 ylabel("accuracy");
 legend({"accuracy"}, 'Location', 'northeast');
 saveas(gcf, filename, 'png');
 
-% To plot the accuracy of the neural network that had been trained in batch
-% mode, according the MathWork documentations, it is to use the net on the
-% validation data and then comparing it with the validation labels. After
-% comparing, obtain the mean absolute error of the differences.
-
-% 66 epochs are required to finish the computation in batch training.
-% By calculation, the error obtained is 0.3114. This brings the accuracy to
-% 0.6886, or 68.86%.
 
 
 
@@ -90,6 +82,29 @@ function [img, label] = extract_img(filepath, folder, i)
     tmp = strsplit(filename, {'_', '.'});
     label = str2num(tmp{3});
    
+end
+
+function [old_dim, old_img, new_dim, new_img] = resize_img(filepath, folder, i, scale)
+    filename = filepath + '\\' + folder(i).name;
+    old_img = imread(filename);
+    old_dim = size(old_img);
+    new_img = imresize(old_img, scale);
+    new_dim = size(new_img);
+end
+
+function [old_dim, old_img, coeff, img, x_form] = pca_img(filepath, folder, i, nComp)
+    filename = filepath + '\\' + folder(i).name;
+    old_img = imread(filename);
+    old_dim = size(old_img);
+    dbl_img = double(old_img);
+    dbl_img_mean = mean(dbl_img);
+    dbl_img_adjusted = dbl_img-dbl_img_mean;
+    
+    [coeff, score] = pca(dbl_img_adjusted);
+    x_form = score(:,1:nComp)*coeff(:,1:nComp)';
+    x_form = x_form + dbl_img_mean;
+    x_form = uint8(x_form);
+    img = dbl_img;
 end
 
 % Possible improvements that can be made:
