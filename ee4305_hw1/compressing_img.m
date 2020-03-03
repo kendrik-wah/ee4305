@@ -1,3 +1,6 @@
+n_train = 501;
+n_val = 167;
+
 % Defining training data
 filepath_train = "group_3\\train";
 train_folder = dir(filepath_train);
