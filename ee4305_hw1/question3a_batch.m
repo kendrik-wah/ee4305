@@ -4,10 +4,10 @@ clear;
 n_train = 501;
 n_val = 167;
 eta = 0.005;
-epoch_test = [1:1:100];
+epoch_test = [0:1:80];
+train_acc = zeros([1 length(epoch_test)]);
 val_acc = zeros([1 length(epoch_test)]);
 
-epoch = [1:1:epochs];
 training_sets = [1:1:501];
 
 % Defining training data
@@ -42,11 +42,12 @@ end
 
 for i=1:length(epoch_test)
     
-    net = perceptron;
+    net = perceptron('hardlim', 'learnp');
     epochs = epoch_test(i);
     net.trainParam.epochs=epochs;
     accu_train = zeros(1, epochs);
     accu_val = zeros(1, epochs);
+    epoch = [1:1:epochs];
     
     net = train(net, training_data, training_label);
     
@@ -56,15 +57,21 @@ for i=1:length(epoch_test)
     val_count = [1:1:n_val];
     val_out = net(validation_data);
     
-    accuracy = 1- mean(abs(val_out - validation_label)); 
-    val_acc(i) = accuracy;
+    train_acc(i) = 1 - mean(abs(train_out - training_label)); 
+    val_acc(i) = 1 - mean(abs(val_out - validation_label)); 
 end
 
+display("training accuracies: ");
+display(train_acc);
+
+display("validation accuracies: ");
+display(val_acc);
+
 filename = sprintf("q3a_batch\\batch_accuracy");
-plot(epoch_test, val_acc);
+plot(epoch_test, train_acc, epoch_test, val_acc);
 xlabel("epochs");
 ylabel("accuracy");
-legend({"accuracy"}, 'Location', 'northeast');
+legend({"training", "validation"}, 'Location', 'northeast');
 saveas(gcf, filename, 'png');
 
 % To plot the accuracy of the neural network that had been trained in batch

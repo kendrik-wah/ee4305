@@ -42,7 +42,7 @@ for i=1:length(epoch_test)
     
    epochs = epoch_test(i);
    epoch = [1:1:epochs]; 
-   [net, accu_train, accu_val] = train_seq(training_data, training_label, validation_data, validation_labe, epochs);
+   [net, accu_train, accu_val] = train_seq(training_data, training_label, validation_data, validation_label, epochs);
    
     filename = sprintf("q3a_sequential\\sequential_epoch_%d", epochs);
     plot(epoch, accu_train, epoch, accu_val);

@@ -5,7 +5,6 @@ n_train = 501;
 n_val = 167;
 eta = 0.01;
 epochs = 8e2;
-scales = [0.75, 0.5, 0.25];
 training_sets = [1:1:501];
 
 % Defining training data
@@ -15,39 +14,21 @@ train_folder = dir(filepath_train);
 % Retrieve validation data
 filepath_val = "group_3\\val";
 val_folder = dir(filepath_val);
-    
-% Changing scaling. No PCA on image.
-for j=1:length(scales)
 
-   dim = 256*scales(j);
+% redefining the data sets according to scales, full clarity
+[training_data, training_label] = extract_img_set(filepath_train, train_folder, n_train, 1);
+[validation_data, validation_label] = extract_img_set(filepath_val, val_folder, n_val, 1);
+epoch = [1:1:epochs];
 
-   % redefining the data sets according to scales, full clarity
-   [training_data, training_label] = extract_img_set(filepath_train, train_folder, n_train, scales(j));
-   [validation_data, validation_label] = extract_img_set(filepath_val, val_folder, n_val, scales(j));
-   epoch = [1:1:epochs];
-   
-   n_components = extract_component_numbers(filepath_train, train_folder, n_train, dim);
-   
-   dimensions_to_test = [1, ceil(n_components/20), ceil(n_components/10), ceil(n_components/5), n_components, min(n_components+50, dim-1)];
-   display(dimensions_to_test);
-   
-   % change number of components, given a certain scale.
-   for k=1:length(dimensions_to_test)
-       
-       train_pca_data = zeros([dim^2, n_train]);
-       
-       for l=3:n_train+2
-           [coeff, img, x_form] = pca_img(filepath_train, train_folder, l, dimensions_to_test(k), scales(j));
-           train_pca_data(:,l-2) = x_form(:);
-       end
-       
-       
-       filename = sprintf("q3b_sequential\\sequential_epoch_%d_components_%dpx", dimensions_to_test(k), dim);
-       [net, accu_train_pca, accu_val_pca] = train_seq(train_pca_data, training_label, validation_data, validation_label, epochs, filename);
-   end
-    
-   filename = sprintf("q3b_sequential\\sequential_%dpx", dim);
-   [net, accu_train, accu_val] = train_seq(training_data, training_label, validation_data, validation_label, epochs, filename);
+n_components = extract_component_numbers(filepath_train, train_folder, n_train, 256);
+
+dimensions_to_test = [1, ceil(n_components/20), ceil(n_components/10), ceil(n_components/5), n_components, min(n_components+50), 255];
+display(dimensions_to_test);
+
+% change number of components, given a certain scale.
+for k=1:length(dimensions_to_test)
+   filename = sprintf("q3d\\sequential_epoch_%d_components", dimensions_to_test(k));
+   [net, accu_train_pca, accu_val_pca] = train_seq(training_data, training_label, validation_data, validation_label, epochs, filename, dimensions_to_test(k));
 end
 
 
@@ -55,10 +36,14 @@ end
 
 
 
-function [net, accu_train, accu_val] = train_seq(training_data, training_label, validation_data, validation_label, epochs, filename)
-    % define perceptron
-    net = perceptron;
-    net.trainParam.epochs = epochs;
+function [net, accu_train, accu_val] = train_seq(training_data, training_label, validation_data, validation_label, epochs, filename, comp)
+    % define patternnet
+    net = patternnet(comp);
+    net.trainFcn = 'trainrp';
+    net.trainParam.lr = 0.01;
+    net.layers{1}.transferFcn = 'tansig';
+    net.layers{2}.transferFcn = 'logsig';
+    net.trainParam.epochs=epochs;
     epoch = [1:1:epochs];
 
     accu_train = zeros(1, epochs);
@@ -79,7 +64,7 @@ function [net, accu_train, accu_val] = train_seq(training_data, training_label, 
     plot(epoch, accu_train, epoch, accu_val);
     xlabel("epoch");
     ylabel("accuracy (%)");
-    legend({'training', 'validation'}, 'Location', 'northwest');
+    legend({'training', 'validation'}, 'Location', 'southeast');
     saveas(gcf, filename, 'png');
 end
 
@@ -106,20 +91,6 @@ function [img_set, label_set] = extract_img_set(filepath, folder, count, scale)
         label_set(:,i-2) = label;
     end
     
-end
-
-function [coeff, img, x_form] = pca_img(filepath, folder, i, nComp, scale)
-    filename = filepath + '\\' + folder(i).name;
-    old_img = imread(filename);
-    img = double(old_img);
-    img = imresize(img, scale);
-    img_mean = mean(img);
-    img_adjusted = img-img_mean;
-    
-    [coeff, score] = pca(img_adjusted);
-    x_form = score(:,1:nComp)*coeff(:,1:nComp)';
-    x_form = x_form + img_mean;
-    x_form = uint8(x_form);
 end
 
 function n_components = extract_component_numbers(filepath, folder, count, dimn)

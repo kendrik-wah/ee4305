@@ -9,9 +9,9 @@ test_min = -3;
 test_max = 3;
 epochs = 5e2;
 n = 6;
-hidden_neurons = [1,2,3,4,5,6,7,8,9,10,20,50];
+hidden_neurons = [1,2,3,4,5,6,7,8,9,10,20,50,100];
 epoch_arr = [1:1:epochs];
-eta = 0.01;
+eta = 0.005;
 
 % Training data
 train_X = [min: train_delta: max];
@@ -41,15 +41,11 @@ for i=1:length(hidden_neurons)
     filename_plot_val = sprintf("q2c_change_hidden\\plot_hidden_%d", hidden_neurons(i));
     filename_scatter_test = sprintf("q2c_extrapolate\\scatter_hidden_%d", hidden_neurons(i));
     filename_plot_test = sprintf("q2c_extrapolate\\plot_hidden_%d", hidden_neurons(i));
-    
-    figure;
-    plotperform(tr);
-    
-    figure
+
     % plot validation data
-    scatter(val_X, val_X_ans, 'x');
+    plot(val_X, val_X_ans);
     hold on;
-    scatter(val_X, val_X_net_output, 'x');
+    scatter(val_X, val_X_net_output);
     hold off;
     xlabel('x');
     ylabel('y');
@@ -63,7 +59,7 @@ for i=1:length(hidden_neurons)
     saveas(gcf, filename_plot_val, 'png');
     
     % plot test data
-    scatter(test_X, test_X_ans, 'x');
+    plot(test_X, test_X_ans);
     hold on;
     scatter(test_X, test_X_net_output, 'x');
     hold off;
@@ -89,10 +85,7 @@ function [net, tr] = train_bat(n, train_X, train_X_label, epochs, eta)
     net.trainParam.epochs = epochs;
     net.layers{1}.transferFcn = 'tansig';
     net.layers{2}.transferFcn = 'purelin';
-    net.inputWeights{1,1}.learnParam.lr = eta;
-    net.layerWeights{2,1}.learnParam.lr = eta;
-    net.biases{1}.learnParam.lr = eta;
-    net.biases{2}.learnParam.lr = eta;
+    net.trainParam.lr = eta;
     
     [net, tr] = train(net, train_X, train_X_label);
 end
