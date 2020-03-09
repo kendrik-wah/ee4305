@@ -38,16 +38,27 @@ x_values = [-2:0.01:2]; y_values = [-2:0.01:2];
 f = @(x,y) (1-x).^2 + 100*(y-x.^2).^2;
 [xx, yy] = meshgrid(x_values, y_values);
 ff = f(xx,yy);
+fn_output = f(x, y);
 contour(xx, yy, ff, 100);
 
 hold on;
 scatter(x, y);
 xlabel('x');
 ylabel('y');
+hold off;
 
+figure;
 plot(iterations, x);
 hold on;
 plot(iterations, y);
+legend({"x", "y"}, 'Location', 'southeast');
+hold off;
+
+figure;
+plot(iterations, fn_output);
+xlabel('iterations');
+ylabel('f');
+
 
 function val = rosen(x, y)
     val = (1-x)^2 + (100 * (y - (x^2))^2);

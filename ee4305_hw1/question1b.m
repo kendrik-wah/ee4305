@@ -62,6 +62,15 @@ xlabel('iterations');
 ylabel('value');
 legend({'x', 'y'}, 'Location', 'northeast');
 
+figure;
+plot(x, y);
+xlabel('x');
+ylabel('y');
+
+figure;
+plot(iterations, z);
+xlabel('iterations');
+ylabel('f');
 
 function val = rosen(x, y)
     val = (1-x)^2 + (100 * (y - (x^2))^2);
