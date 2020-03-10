@@ -45,7 +45,7 @@ for i=1:length(hidden_neurons)
     % plot validation data
     plot(val_X, val_X_ans);
     hold on;
-    scatter(val_X, val_X_net_output);
+    scatter(val_X, val_X_net_output, '.');
     hold off;
     xlabel('x');
     ylabel('y');
@@ -61,7 +61,7 @@ for i=1:length(hidden_neurons)
     % plot test data
     plot(test_X, test_X_ans);
     hold on;
-    scatter(test_X, test_X_net_output, 'x');
+    scatter(test_X, test_X_net_output, '.');
     hold off;
     xlabel('x');
     ylabel('y');
